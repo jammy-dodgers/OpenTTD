@@ -327,6 +327,23 @@ static bool TrainEngineCapacitySorter(const GUIEngineListItem &a, const GUIEngin
 	return _engine_sort_direction ? r > 0 : r < 0;
 }
 
+// Todo: Work out some way to find the length of complex/articulated engines
+// (This is probably why this isnt a sort criteria in vanilla OpenTTD right now,
+// as that sounds like a pain in the ass)
+static bool TrainEngineLengthSorter(const GUIEngineListItem &a, const GUIEngineListItem &b)
+{
+	const RailVehicleInfo *rvi_a = RailVehInfo(a.engine_id);
+	const RailVehicleInfo *rvi_b = RailVehInfo(b.engine_id);
+
+	int va = 8 - rvi_a->shorten_factor;
+	int vb = 8 - rvi_b->shorten_factor;
+	int r = va - vb;
+
+	/* Use EngineID to sort instead since we want consistent sorting */
+	if (r == 0) return EngineNumberSorter(a, b);
+	return _engine_sort_direction ? r > 0 : r < 0;
+}
+
 /**
  * Determines order of train engines by engine / wagon
  * @param a first engine to compare
@@ -434,7 +451,7 @@ static bool AircraftRangeSorter(const GUIEngineListItem &a, const GUIEngineListI
 }
 
 /** Sort functions for the vehicle sort criteria, for each vehicle type. */
-EngList_SortTypeFunction * const _engine_sort_functions[][11] = {{
+EngList_SortTypeFunction * const _engine_sort_functions[][12] = {{
 	/* Trains */
 	&EngineNumberSorter,
 	&EngineCostSorter,
@@ -447,6 +464,7 @@ EngList_SortTypeFunction * const _engine_sort_functions[][11] = {{
 	&EnginePowerVsRunningCostSorter,
 	&EngineReliabilitySorter,
 	&TrainEngineCapacitySorter,
+	&TrainEngineLengthSorter,
 }, {
 	/* Road vehicles */
 	&EngineNumberSorter,
@@ -497,6 +515,7 @@ const std::initializer_list<const StringID> _engine_sort_listing[] = {{
 	STR_SORT_BY_POWER_VS_RUNNING_COST,
 	STR_SORT_BY_RELIABILITY,
 	STR_SORT_BY_CARGO_CAPACITY,
+	STR_SORT_BY_LENGTH,
 }, {
 	/* Road vehicles */
 	STR_SORT_BY_ENGINE_ID,
